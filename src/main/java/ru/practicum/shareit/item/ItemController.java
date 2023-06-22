@@ -24,7 +24,7 @@ public class ItemController {
 
     @GetMapping("{id}")
     public ItemDto getItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                           @PathVariable long id) {
+                           @PathVariable long id) {
         log.info("Запрос на получение вещи: itemId = {}, userId = {}", id, userId);
         return itemService.getItem(userId, id);
     }
@@ -47,7 +47,7 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> searchItems(@RequestHeader("X-Sharer-User-Id") long userId,
-                                    @RequestParam(value = "text") String text) {
+                                     @RequestParam(value = "text") String text) {
         log.info("Запрос на поиск вещей по критерию '{}', userId = {}", text, userId);
         return itemService.searchItems(userId, text);
     }
