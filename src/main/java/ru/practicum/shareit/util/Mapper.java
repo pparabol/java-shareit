@@ -1,7 +1,7 @@
 package ru.practicum.shareit.util;
 
-public interface Mapper<ENTITY, DTO> {
-    ENTITY toEntity(DTO dto);
+public interface Mapper<E, D> {
+    E toEntity(D dto);
 
-    DTO toDto(ENTITY entity);
+    D toDto(E entity);
 }
