@@ -1,13 +1,12 @@
 package ru.practicum.shareit.item.repository;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,9 +25,8 @@ public class InMemoryItemRepository implements ItemRepository {
     }
 
     @Override
-    public Item find(long id) {
-        checkContains(id);
-        return items.get(id);
+    public Optional<Item> find(long id) {
+        return Optional.ofNullable(items.get(id));
     }
 
     @Override
@@ -62,14 +60,5 @@ public class InMemoryItemRepository implements ItemRepository {
 
     private long generateId() {
         return ++nextId;
-    }
-
-    private void checkContains(long id) {
-        if (!items.containsKey(id)) {
-            throw new ValidationException(
-                    HttpStatus.NOT_FOUND,
-                    String.format("Вещь с ID %d не найдена", id)
-            );
-        }
     }
 }

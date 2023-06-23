@@ -6,11 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.Mapper;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,32 +21,39 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final Mapper<Item, ItemDto> itemMapper;
 
     @Override
     public List<ItemDto> getItems(long userId) {
-        userRepository.find(userId);
         return itemRepository.findAllByUserId(userId).stream()
-                .map(ItemMapper::toItemDto)
+                .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public ItemDto getItem(long userId, long id) {
-        userRepository.find(userId);
-        return ItemMapper.toItemDto(itemRepository.find(id));
+        return itemRepository.find(id).map(itemMapper::toDto).orElse(null);
     }
 
     @Override
     public ItemDto saveItem(long userId, ItemDto itemDto) {
-        User user = userRepository.find(userId);
-        Item item = ItemMapper.toItem(itemDto);
+        User user = userRepository.find(userId).orElseThrow(
+                () -> new ValidationException(
+                        HttpStatus.NOT_FOUND,
+                        String.format("Пользователь с ID %d не найден", userId))
+        );
+        Item item = itemMapper.toEntity(itemDto);
         item.setOwner(user);
-        return ItemMapper.toItemDto(itemRepository.save(item));
+        return itemMapper.toDto(itemRepository.save(item));
     }
 
     @Override
     public ItemDto updateItem(long userId, ItemDto itemDto) {
-        Item item = itemRepository.find(itemDto.getId());
+        Item item = itemRepository.find(itemDto.getId()).orElseThrow(
+                () -> new ValidationException(
+                        HttpStatus.NOT_FOUND,
+                        String.format("Вещь с ID %d не найдена", itemDto.getId()))
+        );
         if (userId != item.getOwner().getId()) {
             throw new ValidationException(HttpStatus.FORBIDDEN, "Редактировать вещь может только её владелец");
         }
@@ -59,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        return ItemMapper.toItemDto(itemRepository.update(item));
+        return itemMapper.toDto(itemRepository.update(item));
     }
 
     @Override
@@ -68,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
         return itemRepository.search(text).stream()
-                .map(ItemMapper::toItemDto)
+                .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
 }
