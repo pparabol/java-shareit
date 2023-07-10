@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final Mapper<User, UserDto> userMapper;
@@ -28,19 +30,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUser(long id) {
-        return userRepository.find(id).map(userMapper::toDto).orElse(null);
+        return userRepository.findById(id)
+                .map(userMapper::toDto)
+                .orElseThrow(
+                        () -> new ValidationException(
+                                HttpStatus.NOT_FOUND,
+                                String.format("Пользователь с ID %d не найден", id))
+                );
     }
 
     @Override
+    @Transactional
     public UserDto saveUser(UserDto userDto) {
-        checkEmail(userDto.getEmail());
         User user = userRepository.save(userMapper.toEntity(userDto));
         return userMapper.toDto(user);
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(long id, UserDto userDto) {
-        User created = userRepository.find(id).orElseThrow(
+        User created = userRepository.findById(id).orElseThrow(
                 () -> new ValidationException(
                         HttpStatus.NOT_FOUND,
                         String.format("Пользователь с ID %d не найден", id))
@@ -50,23 +59,14 @@ public class UserServiceImpl implements UserService {
         }
         String email = userDto.getEmail();
         if ((email != null) && (!created.getEmail().equals(email))) {
-            checkEmail(email);
             created.setEmail(email);
         }
-        return userMapper.toDto(userRepository.update(id, created));
+        return userMapper.toDto(userRepository.save(created));
     }
 
     @Override
+    @Transactional
     public void deleteUser(long id) {
-        userRepository.delete(id);
-    }
-
-    private void checkEmail(String email) {
-        if (!userRepository.isUnique(email)) {
-            throw new ValidationException(
-                    HttpStatus.CONFLICT,
-                    String.format("Пользователь с email '%s' уже существует", email)
-            );
-        }
+        userRepository.deleteById(id);
     }
 }
