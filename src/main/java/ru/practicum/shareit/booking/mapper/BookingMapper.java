@@ -30,22 +30,22 @@ public class BookingMapper {
     }
 
     public BookingDto toDto(Booking booking) {
-        return new BookingDto(
-                booking.getId(),
-                booking.getStart(),
-                booking.getEnd(),
-                itemMapper.toDto(booking.getItem()),
-                userMapper.toDto(booking.getBooker()),
-                booking.getStatus()
-        );
+        return BookingDto.builder()
+                .id(booking.getId())
+                .start(booking.getStart())
+                .end(booking.getEnd())
+                .item(itemMapper.toDto(booking.getItem()))
+                .booker(userMapper.toDto(booking.getBooker()))
+                .status(booking.getStatus())
+                .build();
     }
 
     public BookingDtoShort toDtoShort(Booking booking) {
-        return new BookingDtoShort(
-                booking.getId(),
-                booking.getBooker().getId(),
-                booking.getStart(),
-                booking.getEnd()
-        );
+        return BookingDtoShort.builder()
+                .id(booking.getId())
+                .bookerId(booking.getBooker().getId())
+                .start(booking.getStart())
+                .end(booking.getEnd())
+                .build();
     }
 }
