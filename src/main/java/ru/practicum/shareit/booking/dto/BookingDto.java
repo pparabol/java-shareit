@@ -8,7 +8,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import java.time.LocalDateTime;
 
 @Value
-public class BookingDtoResponse {
+public class BookingDto {
     Long id;
     LocalDateTime start;
     LocalDateTime end;

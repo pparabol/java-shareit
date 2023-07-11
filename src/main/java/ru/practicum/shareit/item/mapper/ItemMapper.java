@@ -9,12 +9,11 @@ import ru.practicum.shareit.util.Mapper;
 public class ItemMapper implements Mapper<Item, ItemDto> {
     @Override
     public Item toEntity(ItemDto itemDto) {
-        return new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable()
-        );
+        return Item.builder()
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .build();
     }
 
     @Override

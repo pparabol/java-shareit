@@ -2,10 +2,9 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -33,8 +32,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .map(userMapper::toDto)
                 .orElseThrow(
-                        () -> new ValidationException(
-                                HttpStatus.NOT_FOUND,
+                        () -> new NotFoundException(
                                 String.format("Пользователь с ID %d не найден", id))
                 );
     }
@@ -50,8 +48,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto updateUser(long id, UserDto userDto) {
         User created = userRepository.findById(id).orElseThrow(
-                () -> new ValidationException(
-                        HttpStatus.NOT_FOUND,
+                () -> new NotFoundException(
                         String.format("Пользователь с ID %d не найден", id))
         );
         if (!StringUtils.isBlank(userDto.getName())) {

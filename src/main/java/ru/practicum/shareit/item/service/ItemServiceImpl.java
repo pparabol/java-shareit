@@ -2,13 +2,13 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -70,7 +70,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(long userId, ItemDto itemDto) {
         Item item = findItemOrThrowException(itemDto.getId());
         if (userId != item.getOwner().getId()) {
-            throw new ValidationException(HttpStatus.FORBIDDEN, "Редактировать вещь может только её владелец");
+            throw new NotFoundException("Редактировать вещь может только её владелец");
         }
         if (!StringUtils.isBlank(itemDto.getName())) {
             item.setName(itemDto.getName());
@@ -101,7 +101,6 @@ public class ItemServiceImpl implements ItemService {
         bookingRepository.findFirstByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now())
                 .orElseThrow(
                         () -> new ValidationException(
-                                HttpStatus.BAD_REQUEST,
                                 "Комментировать вещь можно только после завершения её аренды"
                         )
                 );
@@ -113,16 +112,14 @@ public class ItemServiceImpl implements ItemService {
 
     private Item findItemOrThrowException(long itemId) {
         return itemRepository.findById(itemId).orElseThrow(
-                () -> new ValidationException(
-                        HttpStatus.NOT_FOUND,
+                () -> new NotFoundException(
                         String.format("Вещь с ID %d не найдена", itemId))
         );
     }
 
     private User findUserOrThrowException(long userId) {
         return userRepository.findById(userId).orElseThrow(
-                () -> new ValidationException(
-                        HttpStatus.NOT_FOUND,
+                () -> new NotFoundException(
                         String.format("Пользователь с ID %d не найден", userId))
         );
     }

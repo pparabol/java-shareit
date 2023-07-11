@@ -10,7 +10,6 @@ public class CommentMapper implements Mapper<Comment, CommentDto> {
     @Override
     public Comment toEntity(CommentDto dto) {
         return new Comment(
-                dto.getId(),
                 dto.getText()
         );
     }

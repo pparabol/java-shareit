@@ -12,59 +12,51 @@ import java.util.Optional;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByBookerIdOrderByStartDesc(Long bookerId);
 
-    @Query("select b " +
-            "from Booking as b " +
-            "where b.booker.id = ?1 " +
+    @Query("from Booking as b " +
+            "where b.booker.id = :bookerId " +
             "and b.start <= now() and b.end >= now() " +
             "order by b.start desc")
-    List<Booking> findBookerCurrentBookings(Long bookerId);
+    List<Booking> findCurrentBookings(Long bookerId);
 
-    @Query("select b " +
-            "from Booking as b " +
-            "where b.booker.id = ?1 " +
+    @Query("from Booking as b " +
+            "where b.booker.id = :bookerId " +
             "and b.start < now() and b.end <= now() " +
             "order by b.start desc")
-    List<Booking> findBookerPastBookings(Long bookerId);
+    List<Booking> findPastBookings(Long bookerId);
 
-    @Query("select b " +
-            "from Booking as b " +
-            "where b.booker.id = ?1 and b.start > now() and b.end > now() " +
+    @Query("from Booking as b " +
+            "where b.booker.id = :bookerId " +
+            "and b.start > now() and b.end > now() " +
             "order by b.start desc")
-    List<Booking> findBookerFutureBookings(Long bookerId);
+    List<Booking> findFutureBookings(Long bookerId);
 
     List<Booking> findByBookerIdAndStatus(Long bookerId, Status status);
 
     List<Booking> findByItemOwnerIdOrderByStartDesc(Long ownerId);
 
-    @Query("select b " +
-            "from Booking as b " +
-            "where b.item.owner.id = ?1 " +
+    @Query("from Booking as b " +
+            "where b.item.owner.id = :ownerId " +
             "and b.start <= now() and b.end >= now() " +
             "order by b.start desc")
     List<Booking> findOwnerCurrentBookings(Long ownerId);
 
-    @Query("select b " +
-            "from Booking as b " +
-            "where b.item.owner.id = ?1 " +
+    @Query("from Booking as b " +
+            "where b.item.owner.id = :ownerId " +
             "and b.start < now() and b.end <= now() " +
             "order by b.start desc")
     List<Booking> findOwnerPastBookings(Long ownerId);
 
-    @Query("select b " +
-            "from Booking as b " +
-            "where b.item.owner.id = ?1 and b.start > now() and b.end > now() " +
+    @Query("from Booking as b " +
+            "where b.item.owner.id = :ownerId " +
+            "and b.start > now() and b.end > now() " +
             "order by b.start desc")
     List<Booking> findOwnerFutureBookings(Long ownerId);
 
     List<Booking> findByItemOwnerIdAndStatus(Long ownerId, Status status);
 
-    Booking findFirstByItemIdAndStartBeforeOrderByStartDesc(
-            Long itemId, LocalDateTime end
-    );
+    Booking findFirstByItemIdAndStartBeforeOrderByStartDesc(Long itemId, LocalDateTime start);
 
-    Booking findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(
-            Long itemId, LocalDateTime start, Status status
-    );
+    Booking findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(Long itemId, LocalDateTime start, Status status);
 
     Optional<Booking> findFirstByItemIdAndBookerIdAndEndBefore(Long itemId, Long bookerId, LocalDateTime end);
 }

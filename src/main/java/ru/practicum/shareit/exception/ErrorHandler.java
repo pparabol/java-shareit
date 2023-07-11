@@ -2,7 +2,6 @@ package ru.practicum.shareit.exception;
 
 import lombok.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -14,10 +13,15 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler
-    public ResponseEntity<ErrorResponse> handleValidationException(final ValidationException e) {
-        return ResponseEntity
-                .status(e.getStatus())
-                .body(new ErrorResponse(e.getReason()));
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler

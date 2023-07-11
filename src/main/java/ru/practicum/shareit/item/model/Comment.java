@@ -29,8 +29,7 @@ public class Comment {
     @Transient
     private LocalDateTime created = LocalDateTime.now();
 
-    public Comment(Long id, String text) {
-        this.id = id;
+    public Comment(String text) {
         this.text = text;
     }
 }
