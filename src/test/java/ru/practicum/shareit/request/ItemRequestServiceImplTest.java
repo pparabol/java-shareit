@@ -112,4 +112,12 @@ public class ItemRequestServiceImplTest {
         ).isInstanceOf(NotFoundException.class)
                 .hasMessage("Запрос с ID 100 не найден");
     }
+
+    @Test
+    void getItemRequestByIncorrectUserIdShouldThrowException() {
+        assertThatThrownBy(
+                () -> itemRequestService.getItemRequest(404, createdRequest.getId())
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage("Пользователь с ID 404 не найден");
+    }
 }

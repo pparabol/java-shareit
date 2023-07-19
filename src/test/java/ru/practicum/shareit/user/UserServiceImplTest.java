@@ -79,16 +79,17 @@ public class UserServiceImplTest {
 
     @Test
     void updateUser() {
-        UserDto dtoWithNewName = new UserDto(1L, "newName", "email@mail.ru");
+        UserDto dtoWithNewData = new UserDto(1L, "newName", "newEmail@mail.ru");
 
-        userService.updateUser(created.getId(), dtoWithNewName);
+        userService.updateUser(created.getId(), dtoWithNewData);
 
         TypedQuery<User> query = em.createQuery("from User u where u.email = :email", User.class);
-        User user = query.setParameter("email", userDto.getEmail()).getSingleResult();
+        User user = query.setParameter("email", dtoWithNewData.getEmail()).getSingleResult();
 
         assertThat(user.getId()).isNotNull();
-        assertThat(user.getName()).isEqualTo(dtoWithNewName.getName());
-        assertThat(user.getEmail()).isEqualTo(userDto.getEmail());
+        assertThat(user.getId()).isEqualTo(created.getId());
+        assertThat(user.getName()).isEqualTo(dtoWithNewData.getName());
+        assertThat(user.getEmail()).isEqualTo(dtoWithNewData.getEmail());
     }
 
     @Test

@@ -8,6 +8,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingDtoRequest;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -33,6 +35,7 @@ public class ItemServiceImplTest {
     private final EntityManager em;
     private final UserService userService;
     private final ItemService itemService;
+    private final BookingService bookingService;
     private final ItemDto itemDto = ItemDto.builder()
             .name("item")
             .description("description")
@@ -115,20 +118,23 @@ public class ItemServiceImplTest {
 
     @Test
     void updateItem() {
-        ItemDto itemWithNewDescription = ItemDto.builder()
+        ItemDto itemWithNewData = ItemDto.builder()
                 .id(createdItem.getId())
+                .name("newName")
                 .description("newDescription")
+                .available(false)
                 .build();
 
-        itemService.updateItem(createdUser.getId(), itemWithNewDescription);
+        itemService.updateItem(createdUser.getId(), itemWithNewData);
 
         TypedQuery<Item> query = em.createQuery("from Item i where i.name = :name", Item.class);
-        Item item = query.setParameter("name", itemDto.getName()).getSingleResult();
+        Item item = query.setParameter("name", itemWithNewData.getName()).getSingleResult();
 
         assertThat(item.getId()).isNotNull();
-        assertThat(item.getName()).isEqualTo(itemDto.getName());
-        assertThat(item.getDescription()).isEqualTo(itemWithNewDescription.getDescription());
-        assertThat(item.getAvailable()).isTrue();
+        assertThat(item.getId()).isEqualTo(createdItem.getId());
+        assertThat(item.getName()).isEqualTo(itemWithNewData.getName());
+        assertThat(item.getDescription()).isEqualTo(itemWithNewData.getDescription());
+        assertThat(item.getAvailable()).isFalse();
     }
 
     @Test
@@ -170,6 +176,17 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    void searchItemsByEmptyTextShouldReturnEmptyResult() {
+        List<ItemDto> actual = itemService.searchItems(
+                createdUser.getId(),
+                " ",
+                PageRequest.of(0, 2)
+        );
+
+        assertThat(actual).isEmpty();
+    }
+
+    @Test
     void saveCommentWithoutBooking() {
         assertThatThrownBy(
                 () -> itemService.saveComment(createdUser.getId(), createdItem.getId(), commentDto)
@@ -191,5 +208,20 @@ public class ItemServiceImplTest {
                 () -> itemService.saveComment(createdUser.getId(), 404, commentDto)
         ).isInstanceOf(NotFoundException.class)
                 .hasMessage("Вещь с ID 404 не найдена");
+    }
+
+    @Test
+    void saveComment() {
+        UserDto booker = userService.saveUser(new UserDto(2L, "booker", "booker@b.ru"));
+        bookingService.saveBooking(booker.getId(), new BookingDtoRequest(
+                createdItem.getId(),
+                LocalDateTime.now().minusDays(2),
+                LocalDateTime.now().minusDays(1)
+        ));
+
+        CommentDto actual = itemService.saveComment(booker.getId(), createdItem.getId(), commentDto);
+
+        assertThat(actual.getId()).isNotNull();
+        assertThat(actual.getText()).isEqualTo(commentDto.getText());
     }
 }

@@ -234,7 +234,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getCurrentBookerBookings() {
+    void getBookerCurrentBookings() {
         savedBooking = bookingService.saveBooking(
                 booker.getId(),
                 new BookingDtoRequest(
@@ -253,7 +253,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getPastBookerBookings() {
+    void getBookerPastBookings() {
         savedBooking = bookingService.saveBooking(
                 booker.getId(),
                 new BookingDtoRequest(
@@ -272,7 +272,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getFutureBookerBookings() {
+    void getBookerFutureBookings() {
         List<BookingDto> actual = bookingService.getBookerBookings(
                 booker.getId(), "FUTURE", PageRequest.of(0, 2)
         );
@@ -282,13 +282,22 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getWaitingBookerBookings() {
+    void getBookerWaitingBookings() {
         List<BookingDto> actual = bookingService.getBookerBookings(
                 booker.getId(), "WAITING", PageRequest.of(0, 2)
         );
 
         assertThat(actual).hasSize(1);
         assertThat(actual).contains(savedBooking);
+    }
+
+    @Test
+    void getBookerRejectedBookings() {
+        List<BookingDto> actual = bookingService.getBookerBookings(
+                booker.getId(), "REJECTED", PageRequest.of(0, 2)
+        );
+
+        assertThat(actual).isEmpty();
     }
 
     @Test
@@ -320,7 +329,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getCurrentOwnerBookings() {
+    void getOwnerCurrentBookings() {
         savedBooking = bookingService.saveBooking(
                 booker.getId(),
                 new BookingDtoRequest(
@@ -339,7 +348,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getPastOwnerBookings() {
+    void getOwnerPastBookings() {
         savedBooking = bookingService.saveBooking(
                 booker.getId(),
                 new BookingDtoRequest(
@@ -358,7 +367,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getFutureOwnerBookings() {
+    void getOwnerFutureBookings() {
         List<BookingDto> actual = bookingService.getOwnerBookings(
                 owner.getId(), "FUTURE", PageRequest.of(0, 2)
         );
@@ -368,12 +377,21 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getWaitingOwnerBookings() {
+    void getOwnerWaitingBookings() {
         List<BookingDto> actual = bookingService.getOwnerBookings(
                 owner.getId(), "WAITING", PageRequest.of(0, 2)
         );
 
         assertThat(actual).hasSize(1);
         assertThat(actual).contains(savedBooking);
+    }
+
+    @Test
+    void getOwnerRejectedBookings() {
+        List<BookingDto> actual = bookingService.getOwnerBookings(
+                owner.getId(), "REJECTED", PageRequest.of(0, 2)
+        );
+
+        assertThat(actual).isEmpty();
     }
 }
