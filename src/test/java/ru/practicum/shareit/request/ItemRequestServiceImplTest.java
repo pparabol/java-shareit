@@ -57,6 +57,14 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
+    void saveItemRequestWithIncorrectUserIdShouldThrowException() {
+        assertThatThrownBy(
+                () -> itemRequestService.saveItemRequest(404, itemRequestDto)
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage("Пользователь с ID 404 не найден");
+    }
+
+    @Test
     void getAllByRequestor() {
         List<ItemRequestDto> actual = itemRequestService.getAllByRequestor(createdUser.getId());
 
@@ -65,19 +73,28 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getAll() {
-        ItemRequestDto request2 = ItemRequestDto.builder()
-                .description("request2")
-                .build();
-        UserDto user2 = userService.saveUser(new UserDto(2L, "user", "user@u.com"));
-        itemRequestService.saveItemRequest(user2.getId(), request2);
+    void getAllByRequestorWithIncorrectUserIdShouldThrowException() {
+        assertThatThrownBy(
+                () -> itemRequestService.getAllByRequestor(404)
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage("Пользователь с ID 404 не найден");
+    }
 
+    @Test
+    void getAll() {
         List<ItemRequestDto> actual = itemRequestService.getAll(
                 createdUser.getId(), PageRequest.of(0, 2)
         );
 
-        assertThat(actual).hasSize(1);
-        assertThat(actual.get(0).getDescription()).isEqualTo(request2.getDescription());
+        assertThat(actual).isEmpty();
+    }
+
+    @Test
+    void getAllWithIncorrectUserIdShouldThrowException() {
+        assertThatThrownBy(
+                () -> itemRequestService.getAll(404, PageRequest.of(0, 2))
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage("Пользователь с ID 404 не найден");
     }
 
     @Test

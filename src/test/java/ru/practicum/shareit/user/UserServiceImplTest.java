@@ -53,9 +53,9 @@ public class UserServiceImplTest {
     @Test
     void getUserByIncorrectIdShouldThrowException() {
         assertThatThrownBy(
-                () -> userService.getUser(44)
+                () -> userService.getUser(404)
         ).isInstanceOf(NotFoundException.class)
-                .hasMessage("Пользователь с ID 44 не найден");
+                .hasMessage("Пользователь с ID 404 не найден");
     }
 
     @Test
@@ -89,6 +89,14 @@ public class UserServiceImplTest {
         assertThat(user.getId()).isNotNull();
         assertThat(user.getName()).isEqualTo(dtoWithNewName.getName());
         assertThat(user.getEmail()).isEqualTo(userDto.getEmail());
+    }
+
+    @Test
+    void updateUserWithIncorrectIdShouldThrowException() {
+        assertThatThrownBy(
+                () -> userService.updateUser(404, userDto)
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage("Пользователь с ID 404 не найден");
     }
 
     @Test

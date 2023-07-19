@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
@@ -17,6 +19,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +38,12 @@ public class ItemServiceImplTest {
             .description("description")
             .available(true)
             .build();
+    private final CommentDto commentDto = new CommentDto(
+            1L,
+            "comment",
+            "author",
+            LocalDateTime.now()
+    );
     private UserDto createdUser;
     private ItemDto createdItem;
 
@@ -65,9 +74,9 @@ public class ItemServiceImplTest {
     @Test
     void getItemByIncorrectIdShouldThrowException() {
         assertThatThrownBy(
-                () -> itemService.getItem(createdUser.getId(), 500)
+                () -> itemService.getItem(createdUser.getId(), 404)
         ).isInstanceOf(NotFoundException.class)
-                .hasMessage("Вещь с ID 500 не найдена");
+                .hasMessage("Вещь с ID 404 не найдена");
     }
 
     @Test
@@ -79,6 +88,29 @@ public class ItemServiceImplTest {
         assertThat(item.getName()).isEqualTo(itemDto.getName());
         assertThat(item.getDescription()).isEqualTo(itemDto.getDescription());
         assertThat(item.getAvailable()).isTrue();
+    }
+
+    @Test
+    void saveItemWithIncorrectUserIdShouldThrowException() {
+        assertThatThrownBy(
+                () -> itemService.saveItem(404, itemDto)
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage("Пользователь с ID 404 не найден");
+    }
+
+    @Test
+    void saveItemWithIncorrectRequestIdShouldThrowException() {
+        ItemDto incorrectItem = ItemDto.builder()
+                .name("item2")
+                .description("desc")
+                .available(true)
+                .requestId(7L)
+                .build();
+
+        assertThatThrownBy(
+                () -> itemService.saveItem(createdUser.getId(), incorrectItem)
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage(String.format("Запрос с ID %d не найден", incorrectItem.getRequestId()));
     }
 
     @Test
@@ -105,9 +137,59 @@ public class ItemServiceImplTest {
                 .id(createdItem.getId())
                 .description("testUpdate")
                 .build();
+
         assertThatThrownBy(
-                () -> itemService.updateItem(30, item)
+                () -> itemService.updateItem(404, item)
         ).isInstanceOf(NotFoundException.class)
                 .hasMessage("Редактировать вещь может только её владелец");
+    }
+
+    @Test
+    void updateItemByIncorrectIdShouldThrowException() {
+        ItemDto item = ItemDto.builder()
+                .id(404L)
+                .description("testUpdate")
+                .build();
+
+        assertThatThrownBy(
+                () -> itemService.updateItem(createdUser.getId(), item)
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage(String.format("Вещь с ID %d не найдена", item.getId()));
+    }
+
+    @Test
+    void searchItems() {
+        List<ItemDto> actual = itemService.searchItems(
+                createdUser.getId(),
+                "item",
+                PageRequest.of(0, 2)
+        );
+
+        assertThat(actual).hasSize(1);
+        assertThat(actual).contains(createdItem);
+    }
+
+    @Test
+    void saveCommentWithoutBooking() {
+        assertThatThrownBy(
+                () -> itemService.saveComment(createdUser.getId(), createdItem.getId(), commentDto)
+        ).isInstanceOf(ValidationException.class)
+                .hasMessage("Комментировать вещь можно только после завершения её аренды");
+    }
+
+    @Test
+    void saveCommentWithIncorrectUserId() {
+        assertThatThrownBy(
+                () -> itemService.saveComment(404, createdItem.getId(), commentDto)
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage("Пользователь с ID 404 не найден");
+    }
+
+    @Test
+    void saveCommentWIthIncorrectItemId() {
+        assertThatThrownBy(
+                () -> itemService.saveComment(createdUser.getId(), 404, commentDto)
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage("Вещь с ID 404 не найдена");
     }
 }
