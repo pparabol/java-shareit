@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -16,6 +17,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.Mapper;
@@ -33,13 +36,14 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
     private final Mapper<Item, ItemDto> itemMapper;
     private final BookingMapper bookingMapper;
     private final Mapper<Comment, CommentDto> commentMapper;
 
     @Override
-    public List<ItemDto> getItems(long userId) {
-        return itemRepository.findByOwnerId(userId).stream()
+    public List<ItemDto> getItems(long userId, PageRequest pageRequest) {
+        return itemRepository.findByOwnerId(userId, pageRequest).stream()
                 .map(itemMapper::toDto)
                 .map(this::uploadBookings)
                 .map(this::uploadComments)
@@ -62,6 +66,15 @@ public class ItemServiceImpl implements ItemService {
         User user = findUserOrThrowException(userId);
         Item item = itemMapper.toEntity(itemDto);
         item.setOwner(user);
+
+        Long requestId = itemDto.getRequestId();
+        if (requestId != null) {
+            ItemRequest request = itemRequestRepository.findById(requestId).orElseThrow(
+                    () -> new NotFoundException(
+                            String.format("Запрос с ID %d не найден", requestId))
+            );
+            item.setRequest(request);
+        }
         return itemMapper.toDto(itemRepository.save(item));
     }
 
@@ -85,16 +98,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItems(long userId, String text) {
+    public List<ItemDto> searchItems(long userId, String text, PageRequest pageRequest) {
         if (StringUtils.isBlank(text)) {
             return Collections.emptyList();
         }
-        return itemRepository.searchByQuery(text.toLowerCase()).stream()
+        return itemRepository.searchByQuery(text.toLowerCase(), pageRequest).stream()
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public CommentDto saveComment(long userId, long itemId, CommentDto commentDto) {
         User author = findUserOrThrowException(userId);
         Item item = findItemOrThrowException(itemId);

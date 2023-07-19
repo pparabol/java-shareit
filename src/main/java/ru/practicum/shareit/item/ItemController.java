@@ -2,25 +2,35 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("Запрос на получение всех вещей пользователя {}", userId);
-        return itemService.getItems(userId);
+    public List<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") long userId,
+                                  @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                  @RequestParam(defaultValue = "10") @Positive int size) {
+        log.info("Запрос на получение всех вещей пользователя: " +
+                        "userId = {}, from = {}, size = {}",
+                userId, from, size
+        );
+        return itemService.getItems(userId, PageRequest.of(from / size, size));
     }
 
     @GetMapping("{id}")
@@ -48,9 +58,14 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> searchItems(@RequestHeader("X-Sharer-User-Id") long userId,
-                                     @RequestParam(value = "text") String text) {
-        log.info("Запрос на поиск вещей по критерию '{}', userId = {}", text, userId);
-        return itemService.searchItems(userId, text);
+                                     @RequestParam String text,
+                                     @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                     @RequestParam(defaultValue = "10") @Positive int size) {
+        log.info("Запрос на поиск вещей по критерию " +
+                        "'{}', userId = {}, from = {}, size = {}",
+                text, userId, from, size
+        );
+        return itemService.searchItems(userId, text, PageRequest.of(from / size, size));
     }
 
     @PostMapping("{itemId}/comment")
