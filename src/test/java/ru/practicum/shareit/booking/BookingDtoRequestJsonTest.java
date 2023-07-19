@@ -31,7 +31,7 @@ public class BookingDtoRequestJsonTest {
         assertThat(result).extractingJsonPathNumberValue("$.itemId").isEqualTo(1);
         assertThat(result).extractingJsonPathStringValue("$.start")
                 .isEqualTo(bookingDtoRequest.getStart().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        assertThat(result).extractingJsonPathStringValue("$.end").
-                isEqualTo(bookingDtoRequest.getEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        assertThat(result).extractingJsonPathStringValue("$.end")
+                .isEqualTo(bookingDtoRequest.getEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
     }
 }

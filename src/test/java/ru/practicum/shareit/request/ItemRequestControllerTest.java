@@ -33,7 +33,7 @@ public class ItemRequestControllerTest {
 
     private final MockMvc mvc;
 
-    private final static String HEADER = "X-Sharer-User-Id";
+    private final String header = "X-Sharer-User-Id";
 
     private final ItemRequestDto itemRequestDto = ItemRequestDto.builder()
             .id(1L)
@@ -46,7 +46,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.saveItemRequest(anyLong(), any())).thenReturn(itemRequestDto);
 
         mvc.perform(post("/requests")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .content(mapper.writeValueAsString(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +75,7 @@ public class ItemRequestControllerTest {
         ItemRequestDto incorrectRequest = ItemRequestDto.builder().build();
 
         mvc.perform(post("/requests")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .content(mapper.writeValueAsString(incorrectRequest))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +90,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.getAllByRequestor(anyLong())).thenReturn(requestList);
 
         mvc.perform(get("/requests")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(requestList)));
@@ -103,7 +103,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.getAll(anyLong(), any())).thenReturn(requestList);
 
         mvc.perform(get("/requests/all")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON)
                         .param("from", "0")
                         .param("size", "4"))
@@ -116,7 +116,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.getItemRequest(anyLong(), anyLong())).thenReturn(itemRequestDto);
 
         mvc.perform(get("/requests/1")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isOk(),

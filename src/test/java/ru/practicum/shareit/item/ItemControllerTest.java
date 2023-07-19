@@ -34,7 +34,7 @@ public class ItemControllerTest {
 
     private final MockMvc mvc;
 
-    private final static String HEADER = "X-Sharer-User-Id";
+    private final String header = "X-Sharer-User-Id";
 
     private final ItemDto itemDto = ItemDto.builder()
             .id(1L)
@@ -57,7 +57,7 @@ public class ItemControllerTest {
         when(itemService.getItems(anyLong(), any())).thenReturn(itemList);
 
         mvc.perform(get("/items")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON)
                         .param("from", "0")
                         .param("size", "3"))
@@ -70,7 +70,7 @@ public class ItemControllerTest {
         when(itemService.getItem(anyLong(), anyLong())).thenReturn(itemDto);
 
         mvc.perform(get("/items/1")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(itemDto)));
@@ -81,7 +81,7 @@ public class ItemControllerTest {
         when(itemService.saveItem(anyLong(), any())).thenReturn(itemDto);
 
         mvc.perform(post("/items")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -114,7 +114,7 @@ public class ItemControllerTest {
                 .build();
 
         mvc.perform(post("/items")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .content(mapper.writeValueAsString(incorrectItem))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -131,7 +131,7 @@ public class ItemControllerTest {
                 .build();
 
         mvc.perform(post("/items")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .content(mapper.writeValueAsString(incorrectItem))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +147,7 @@ public class ItemControllerTest {
                 .build();
 
         mvc.perform(post("/items")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .content(mapper.writeValueAsString(incorrectItem))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -160,7 +160,7 @@ public class ItemControllerTest {
         when(itemService.updateItem(anyLong(), any())).thenReturn(itemDto);
 
         mvc.perform(patch("/items/1")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -181,7 +181,7 @@ public class ItemControllerTest {
         when(itemService.searchItems(anyLong(), anyString(), any())).thenReturn(itemList);
 
         mvc.perform(get("/items/search")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON)
                         .param("text", "item")
                         .param("from", "0")
@@ -193,7 +193,7 @@ public class ItemControllerTest {
     @Test
     void searchItemsWithoutText() throws Exception {
         mvc.perform(get("/items/search")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON)
                         .param("from", "0")
                         .param("size", "2"))
@@ -205,7 +205,7 @@ public class ItemControllerTest {
         when(itemService.saveComment(anyLong(), anyLong(), any())).thenReturn(commentDto);
 
         mvc.perform(post("/items/1/comment")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(commentDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -230,7 +230,7 @@ public class ItemControllerTest {
         );
 
         mvc.perform(post("/items/1/comment")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(commentWithoutText))
                         .characterEncoding(StandardCharsets.UTF_8)

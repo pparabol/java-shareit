@@ -32,7 +32,7 @@ public class BookingControllerTest {
 
     private final MockMvc mvc;
 
-    private final static String HEADER = "X-Sharer-User-Id";
+    private final String header = "X-Sharer-User-Id";
 
     private final BookingDtoRequest dtoRequest = new BookingDtoRequest(
             1L,
@@ -56,7 +56,7 @@ public class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(HEADER, 1))
+                        .header(header, 1))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookingDto)));
     }
@@ -84,7 +84,7 @@ public class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(HEADER, 1))
+                        .header(header, 1))
                 .andExpect(status().isBadRequest());
     }
 
@@ -101,7 +101,7 @@ public class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(HEADER, 1))
+                        .header(header, 1))
                 .andExpect(status().isBadRequest());
     }
 
@@ -118,7 +118,7 @@ public class BookingControllerTest {
                 .thenReturn(expectedDto);
 
         mvc.perform(patch("/bookings/1")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .param("approved", "true")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -128,7 +128,7 @@ public class BookingControllerTest {
     @Test
     void approveBookingWithoutApproved() throws Exception {
         mvc.perform(patch("/bookings/1")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
@@ -138,7 +138,7 @@ public class BookingControllerTest {
         when(bookingService.getBooking(anyLong(), anyLong())).thenReturn(bookingDto);
 
         mvc.perform(get("/bookings/1")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookingDto)));
@@ -152,7 +152,7 @@ public class BookingControllerTest {
                 .thenReturn(bookingList);
 
         mvc.perform(get("/bookings")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .param("from", "0")
                         .param("size", "5")
                         .accept(MediaType.APPLICATION_JSON))
@@ -168,7 +168,7 @@ public class BookingControllerTest {
                 .thenReturn(bookingList);
 
         mvc.perform(get("/bookings/owner")
-                        .header(HEADER, 1)
+                        .header(header, 1)
                         .param("from", "0")
                         .param("size", "5")
                         .accept(MediaType.APPLICATION_JSON))
