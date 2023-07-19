@@ -96,7 +96,7 @@ public class BookingServiceImpl implements BookingService {
         State stateValue = getStateOrThrowException(state);
         switch (stateValue) {
             case ALL:
-                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId, pageRequest);
+                bookings = bookingRepository.findByBookerId(userId, pageRequest);
                 break;
             case CURRENT:
                 bookings = bookingRepository.findCurrentBookings(userId, pageRequest);
@@ -129,7 +129,7 @@ public class BookingServiceImpl implements BookingService {
         State stateValue = getStateOrThrowException(state);
         switch (stateValue) {
             case ALL:
-                bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId, pageRequest);
+                bookings = bookingRepository.findByItemOwnerId(userId, pageRequest);
                 break;
             case CURRENT:
                 bookings = bookingRepository.findOwnerCurrentBookings(userId, pageRequest);

@@ -11,46 +11,40 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByBookerIdOrderByStartDesc(Long bookerId, Pageable pageable);
+    List<Booking> findByBookerId(Long bookerId, Pageable pageable);
 
     @Query("from Booking as b " +
             "where b.booker.id = :bookerId " +
-            "and b.start <= now() and b.end >= now() " +
-            "order by b.start desc")
+            "and b.start <= now() and b.end >= now()")
     List<Booking> findCurrentBookings(Long bookerId, Pageable pageable);
 
     @Query("from Booking as b " +
             "where b.booker.id = :bookerId " +
-            "and b.start < now() and b.end <= now() " +
-            "order by b.start desc")
+            "and b.start < now() and b.end <= now()")
     List<Booking> findPastBookings(Long bookerId, Pageable pageable);
 
     @Query("from Booking as b " +
             "where b.booker.id = :bookerId " +
-            "and b.start > now() and b.end > now() " +
-            "order by b.start desc")
+            "and b.start > now() and b.end > now()")
     List<Booking> findFutureBookings(Long bookerId, Pageable pageable);
 
     List<Booking> findByBookerIdAndStatus(Long bookerId, Status status, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdOrderByStartDesc(Long ownerId, Pageable pageable);
+    List<Booking> findByItemOwnerId(Long ownerId, Pageable pageable);
 
     @Query("from Booking as b " +
             "where b.item.owner.id = :ownerId " +
-            "and b.start <= now() and b.end >= now() " +
-            "order by b.start desc")
+            "and b.start <= now() and b.end >= now()")
     List<Booking> findOwnerCurrentBookings(Long ownerId, Pageable pageable);
 
     @Query("from Booking as b " +
             "where b.item.owner.id = :ownerId " +
-            "and b.start < now() and b.end <= now() " +
-            "order by b.start desc")
+            "and b.start < now() and b.end <= now()")
     List<Booking> findOwnerPastBookings(Long ownerId, Pageable pageable);
 
     @Query("from Booking as b " +
             "where b.item.owner.id = :ownerId " +
-            "and b.start > now() and b.end > now() " +
-            "order by b.start desc")
+            "and b.start > now() and b.end > now()")
     List<Booking> findOwnerFutureBookings(Long ownerId, Pageable pageable);
 
     List<Booking> findByItemOwnerIdAndStatus(Long ownerId, Status status, Pageable pageable);
