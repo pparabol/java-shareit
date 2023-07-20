@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -89,28 +90,29 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public List<BookingDto> getBookerBookings(long userId, String state) {
+    public List<BookingDto> getBookerBookings(long userId, String state, PageRequest pageRequest) {
         findUserOrThrowException(userId);
         List<Booking> bookings = new ArrayList<>();
         State stateValue = getStateOrThrowException(state);
         switch (stateValue) {
             case ALL:
-                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByBookerId(userId, pageRequest);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findCurrentBookings(userId);
+                bookings = bookingRepository.findCurrentBookings(userId, pageRequest);
                 break;
             case PAST:
-                bookings = bookingRepository.findPastBookings(userId);
+                bookings = bookingRepository.findPastBookings(userId, pageRequest);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findFutureBookings(userId);
+                bookings = bookingRepository.findFutureBookings(userId, pageRequest);
                 break;
             case WAITING:
             case REJECTED:
                 bookings = bookingRepository.findByBookerIdAndStatus(
                         userId,
-                        Status.valueOf(state)
+                        Status.valueOf(state),
+                        pageRequest
                 );
                 break;
         }
@@ -121,28 +123,29 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public List<BookingDto> getOwnerBookings(long userId, String state) {
+    public List<BookingDto> getOwnerBookings(long userId, String state, PageRequest pageRequest) {
         findUserOrThrowException(userId);
         List<Booking> bookings = new ArrayList<>();
         State stateValue = getStateOrThrowException(state);
         switch (stateValue) {
             case ALL:
-                bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByItemOwnerId(userId, pageRequest);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findOwnerCurrentBookings(userId);
+                bookings = bookingRepository.findOwnerCurrentBookings(userId, pageRequest);
                 break;
             case PAST:
-                bookings = bookingRepository.findOwnerPastBookings(userId);
+                bookings = bookingRepository.findOwnerPastBookings(userId, pageRequest);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findOwnerFutureBookings(userId);
+                bookings = bookingRepository.findOwnerFutureBookings(userId, pageRequest);
                 break;
             case WAITING:
             case REJECTED:
                 bookings = bookingRepository.findByItemOwnerIdAndStatus(
                         userId,
-                        Status.valueOf(state)
+                        Status.valueOf(state),
+                        pageRequest
                 );
                 break;
         }
