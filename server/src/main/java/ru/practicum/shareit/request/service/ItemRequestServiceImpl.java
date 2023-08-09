@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -47,8 +48,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestDto> getAll(long userId, PageRequest pageRequest) {
+    public List<ItemRequestDto> getAll(long userId, int from, int size) {
         findUserOrThrowException(userId);
+        PageRequest pageRequest = PageRequest.of(
+                from / size,
+                size,
+                Sort.by(Sort.Direction.DESC, "created")
+        );
         return itemRequestRepository.findAllByRequestorIdNot(userId, pageRequest).stream()
                 .map(itemRequestMapper::toDto)
                 .map(this::uploadItems)

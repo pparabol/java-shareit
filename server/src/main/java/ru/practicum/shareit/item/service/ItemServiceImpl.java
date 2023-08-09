@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -42,7 +43,12 @@ public class ItemServiceImpl implements ItemService {
     private final Mapper<Comment, CommentDto> commentMapper;
 
     @Override
-    public List<ItemDto> getItems(long userId, PageRequest pageRequest) {
+    public List<ItemDto> getItems(long userId, int from, int size) {
+        PageRequest pageRequest = PageRequest.of(
+                from / size,
+                size,
+                Sort.by(Sort.Direction.ASC, "id")
+        );
         return itemRepository.findByOwnerId(userId, pageRequest).stream()
                 .map(itemMapper::toDto)
                 .map(this::uploadBookings)
@@ -98,11 +104,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItems(long userId, String text, PageRequest pageRequest) {
+    public List<ItemDto> searchItems(long userId, String text, int from, int size) {
         if (StringUtils.isBlank(text)) {
             return Collections.emptyList();
         }
-        return itemRepository.searchByQuery(text.toLowerCase(), pageRequest).stream()
+        return itemRepository.searchByQuery(text.toLowerCase(), PageRequest.of(from / size, size))
+                .stream()
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }

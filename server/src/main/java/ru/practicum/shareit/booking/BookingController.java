@@ -4,8 +4,6 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 
@@ -42,11 +40,7 @@ public class BookingController {
                                         @RequestParam(defaultValue = "all") String state,
                                         @RequestParam(defaultValue = "0") int from,
                                         @RequestParam(defaultValue = "10") int size) {
-        return bookingService.getBookerBookings(
-                userId,
-                state,
-                PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"))
-        );
+        return bookingService.getBookerBookings(userId, state, from, size);
     }
 
     @GetMapping("owner")
@@ -54,10 +48,6 @@ public class BookingController {
                                                @RequestParam(defaultValue = "all") String state,
                                                @RequestParam(defaultValue = "0") int from,
                                                @RequestParam(defaultValue = "10") int size) {
-        return bookingService.getOwnerBookings(
-                userId,
-                state,
-                PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"))
-        );
+        return bookingService.getOwnerBookings(userId, state, from, size);
     }
 }

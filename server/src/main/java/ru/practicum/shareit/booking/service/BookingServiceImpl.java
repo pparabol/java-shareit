@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -90,8 +91,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public List<BookingDto> getBookerBookings(long userId, String state, PageRequest pageRequest) {
+    public List<BookingDto> getBookerBookings(long userId, String state, int from, int size) {
         findUserOrThrowException(userId);
+        PageRequest pageRequest = toPageRequest(from, size);
         List<Booking> bookings = new ArrayList<>();
         State stateValue = State.valueOf(state);
         switch (stateValue) {
@@ -123,8 +125,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public List<BookingDto> getOwnerBookings(long userId, String state, PageRequest pageRequest) {
+    public List<BookingDto> getOwnerBookings(long userId, String state, int from, int size) {
         findUserOrThrowException(userId);
+        PageRequest pageRequest = toPageRequest(from, size);
         List<Booking> bookings = new ArrayList<>();
         State stateValue = State.valueOf(state);
         switch (stateValue) {
@@ -166,5 +169,9 @@ public class BookingServiceImpl implements BookingService {
                 () -> new NotFoundException(
                         String.format("Пользователь с ID %d не найден", userId))
         );
+    }
+
+    private PageRequest toPageRequest(int from, int size) {
+        return PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"));
     }
 }

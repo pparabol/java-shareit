@@ -2,8 +2,6 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -24,10 +22,7 @@ public class ItemController {
     public List<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") long userId,
                                   @RequestParam(defaultValue = "0") int from,
                                   @RequestParam(defaultValue = "10") int size) {
-        return itemService.getItems(
-                userId,
-                PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "id"))
-        );
+        return itemService.getItems(userId, from, size);
     }
 
     @GetMapping("{id}")
@@ -55,7 +50,7 @@ public class ItemController {
                                      @RequestParam String text,
                                      @RequestParam(defaultValue = "0") int from,
                                      @RequestParam(defaultValue = "10") int size) {
-        return itemService.searchItems(userId, text, PageRequest.of(from / size, size));
+        return itemService.searchItems(userId, text, from, size);
     }
 
     @PostMapping("{itemId}/comment")
